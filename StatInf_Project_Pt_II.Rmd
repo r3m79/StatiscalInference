@@ -1,0 +1,228 @@
+---
+title: "Statistical Inference Project Part II"
+author: "R3M79"
+date: "27 de Dezembro de 2017"
+output: pdf_document
+---
+
+# Synopsis
+
+This document pertains to Cousera's Statistical Inference model Project.
+The project is divided in two parts
+
+1. A simulation exercise.
+
+2. Basic inferential data analysis.
+
+In this document we'll address part 2 of the project
+
+# Part 2: Basic Inferential Data Analysis
+
+## Overview
+
+Now in the second portion of the project, we're going to analyze the ToothGrowth data in the R datasets package.
+
+1. Load the ToothGrowth data and perform some basic exploratory data analyses.
+
+2. Provide a basic summary of the data.
+
+3. Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose. (Only use the techniques from class, even if there's other approaches worth considering)
+
+4. State your conclusions and the assumptions needed for your conclusions.
+
+## Preparation
+
+```{r setup, include=FALSE }
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE, include = FALSE)
+
+
+```
+
+First we'll load the required libraries and data
+
+```{r loadLibrariesData,message=FALSE, warning=FALSE}
+
+#load libraries
+library(dplyr)
+library(ggplot2)
+
+#load data
+data(ToothGrowth)
+
+#Define Variables for simulation
+set.seed(100) # set the seed value for reproducibility
+
+```
+
+### Data Detail and Summary
+```{r plotDataPrep,message=FALSE, warning=FALSE}
+plotdata <- ggplot(ToothGrowth, aes(as.factor(dose),len,fill = supp))
+plotdata <- plotdata + geom_bar(stat = "identity", position = "dodge") + 
+        labs(title = "Tooth Growth per dose and supplement", 
+             x = "Dose", y = "Growth Length")
+
+```
+
+
+```{r summDataDisplay,message=FALSE, warning=FALSE,include=TRUE}
+
+#Preview of data
+head(ToothGrowth,15)
+
+#Detail of data
+str(ToothGrowth)
+
+#Data Summary
+summary(ToothGrowth)
+
+#plot data
+plotdata
+
+```
+From the above output and plot we can now see how the data is organized. We can see that there's no value for a dose of 1.5
+
+##Hypotesis testing
+
+###Growth by Supplement
+
+Let's perform a t test to compare Growth by Supplement
+
+```{r ttestGrowSupp,message=FALSE, warning=FALSE}
+
+#Compare tooth growth by supplement using a t-test.
+t_gr_sup <- t.test(len~supp,data=ToothGrowth)
+```
+
+```{r ttestGrowSuppDisp,message=FALSE, warning=FALSE,include=TRUE}
+cat("Conf Int:",t_gr_sup$conf.int,"p-value",t_gr_sup$p.value)
+
+```
+
+The p-value of this test was 0.06, which is greater than 0.05, and the confidence interval of the test contains zero.
+With these results we can't reject the null hypothesis that the different supplement types don't have effect on tooth growth length.
+
+
+###Growth by Doses
+
+Now we'll compare tooth growth by dose, testing the different pairs of dose values. (The data doesn't posess any value for doses 1.5)
+
+```{r ttestGrowDose_1_2,message=FALSE, warning=FALSE}
+
+#Compare tooth growth by supplement using a t-test.
+# doses 1 and 2
+t_gr_dose_1_2 <- t.test(len~dose,data=subset(ToothGrowth,
+                                             dose %in% c(1, 2)))
+```
+
+```{r ttestGrowDose_1_2Disp,message=FALSE, warning=FALSE,include=TRUE}
+#"Doses 1.0 and 2.0"
+cat("Conf Int:",t_gr_dose_1_2$conf.int,"p-value",t_gr_dose_1_2$p.value)
+
+```
+
+```{r ttestGrowSupp_.5_1,message=FALSE, warning=FALSE}
+
+#Compare tooth growth by supplement using a t-test.
+# doses .5 and 1
+t_gr_dose_5_1 <- t.test(len~dose,data=subset(ToothGrowth,
+                                             dose %in% c(.5, 1)))
+```
+
+```{r ttestGrowSupp_.5_1Disp,message=FALSE, warning=FALSE,include=TRUE}
+#"Doses 0.5 and 1.0"
+cat("Conf Int:",t_gr_dose_5_1$conf.int,
+    "p-value",t_gr_dose_5_1$p.value)
+```
+
+```{r ttestGrowSupp_.5_2,message=FALSE, warning=FALSE}
+
+#Compare tooth growth by supplement using a t-test.
+# doses .5 and 2
+t_gr_dose_5_2 <- t.test(len~dose,data=subset(ToothGrowth,
+                                             dose %in% c(0.5, 2)))
+```
+
+```{r ttestGrowSupp_.5_2Disp,message=FALSE, warning=FALSE,include=TRUE}
+#"Doses 0.5 and 2.0"
+cat("Conf Int:",t_gr_dose_5_2$conf.int,
+    "p-value",t_gr_dose_5_2$p.value)
+
+```
+From the above results we see that the p-value is always very close to zero.
+The confidence intervals for each test don't cross the value zero.
+
+Based on these results we can assume that the average tooth length increases with an inceasing dose, and therefore the null hypothesis can be rejected.
+
+## Conclusion
+
+In our analysis we considered the following assumptions:
+
+1. The sample is representative of the population
+
+2. The distribution of the sample means follows the Central Limit Theorem
+
+Based on the presented results on the previous chapters we can conclude that the supplement has no effect on tooth growth length. 
+However, as the dosage is increased a growth of the tooth will occur.
+
+# Appendix
+
+## Code
+Below follows all the code necessary for the displayed information and plots.
+
+```{r codeDisplay,message=FALSE, warning=FALSE,include=TRUE,eval=FALSE}
+#load libraries
+library(dplyr)
+library(ggplot2)
+
+#Define Variables for simulation
+set.seed(100) # set the seed value for reproducibility
+
+#Load Data
+data("ToothGrowth")
+
+#plot data preparation
+plotdata <- ggplot(ToothGrowth, aes(as.factor(dose),len,fill = supp))
+plotdata <- plotdata + geom_bar(stat = "identity", position = "dodge") + 
+    labs(title = "Tooth Growth per dose and supplement", 
+         x = "Dose", y = "Growth Length")
+
+
+#Preview of data
+head(ToothGrowth,15)
+
+#Detail of data
+str(ToothGrowth)
+
+#Data Summary
+summary(ToothGrowth)
+
+#plot data
+plotdata
+
+#Compare tooth growth by supplement using a t-test.
+t_gr_sup <- t.test(len~supp,data=ToothGrowth)
+cat("Conf Int:",t_gr_sup$conf.int,
+    "p-value",t_gr_sup$p.value)
+
+#Compare tooth growth by supplement using a t-test.
+# doses 1 and 2
+t_gr_dose_1_2 <- t.test(len~dose,data=subset(ToothGrowth,
+                                             dose %in% c(1, 2)))
+cat("Conf Int:",t_gr_dose_1_2$conf.int,
+    "p-value",t_gr_dose_1_2$p.value)
+
+#Compare tooth growth by supplement using a t-test.
+# doses .5 and 1
+t_gr_dose_5_1 <- t.test(len~dose,data=subset(ToothGrowth,
+                                             dose %in% c(.5, 1)))
+cat("Conf Int:",t_gr_dose_5_1$conf.int,
+    "p-value",t_gr_dose_5_1$p.value)
+
+#Compare tooth growth by supplement using a t-test.
+# doses .5 and 2
+t_gr_dose_5_2 <- t.test(len~dose,data=subset(ToothGrowth,
+                                             dose %in% c(0.5, 2)))
+cat("Conf Int:",t_gr_dose_5_2$conf.int,
+    "p-value",t_gr_dose_5_2$p.value)
+
+```
